@@ -2,5 +2,18 @@
     <string name="app_name">Fun With Flags</string>
     <string name="enter_your_name">Enter name your please</string>
     <string name="submit">SUBMIT</string>
+    <string name="go_to_next_question">GO TO NEXT QUESTION</string>
     <string name="finish">FINISH</string>
+    <string name="finished_toast">This is the end of the quiz.</string>
+    <string name="quiz_image">Quiz Image</string>
+    <string name="fun_with_flags">Fun With Flags</string>
+    <string name="welcome">Welcome</string>
+    <string name="please_enter_your_name">Please enter your name</string>
+    <string name="e_g_john">e.g. John</string>
+    <string name="start">Start</string>
+    <string name="result">Result</string>
+    <string name="image">image</string>
+    <string name="hey_congratulations">Hey Congratulations!</string>
+    <string name="your_score_is">Your Score is %d out of %d</string>
+    <string name="progress_current_pos">%d/%d</string>
 </resources>

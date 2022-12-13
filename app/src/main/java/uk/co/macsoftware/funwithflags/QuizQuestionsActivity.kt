@@ -1,18 +1,18 @@
 package uk.co.macsoftware.funwithflags
 
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.ProgressBar
-import android.widget.TextView
+import android.widget.*
 import androidx.core.content.ContextCompat
 
 class QuizQuestionsActivity : AppCompatActivity(), View.OnClickListener {
+
+    private var mUserName: String? = null
+    private var mCorrectAnswers: Int = 0
 
     private var mCurrentPosition: Int = 1
     private var mQuestionsList:ArrayList<Question>? = null
@@ -33,6 +33,9 @@ class QuizQuestionsActivity : AppCompatActivity(), View.OnClickListener {
     private var buttonSubmit: Button? = null
 
     private fun init(){
+
+        mUserName = intent.getStringExtra(Constants.USER_NAME)
+
         progressBar = findViewById(R.id.progressBar)
         textViewProgress = findViewById(R.id.textViewProgress)
 
@@ -66,12 +69,16 @@ class QuizQuestionsActivity : AppCompatActivity(), View.OnClickListener {
         setQuestion()
     }
 
+    /**
+     * Clears the correct and wrong answers then sets the next question on the activity
+     */
     private fun setQuestion() {
-
+        defaultOptionsView()
         val question: Question = mQuestionsList!![mCurrentPosition - 1]
         progressBar?.progress = mCurrentPosition
+        progressBar?.max = mQuestionsList!!.size
         imageViewImage?.setImageResource(question.image)
-        textViewProgress?.text = "$mCurrentPosition/${progressBar?.max}"
+        textViewProgress?.text = getString(R.string.progress_current_pos, mCurrentPosition, progressBar?.max)
         textViewQuestion?.text = question.question
         textViewOption1?.text = question.optionOne
         textViewOption2?.text = question.optionTwo
@@ -86,6 +93,9 @@ class QuizQuestionsActivity : AppCompatActivity(), View.OnClickListener {
 
     }
 
+    /**
+     * Clears the formatting for all the previous answers and guesses to the default format.
+     */
     private fun defaultOptionsView(){
         val options = ArrayList<TextView>()
         textViewOption1?.let {
@@ -109,6 +119,9 @@ class QuizQuestionsActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
+    /**
+     * Changes the format of the selected option to give visual feedback.
+     */
     private fun selectedOptionView(tv: TextView, selectedOptionNum:Int){
         defaultOptionsView()
         mSelectedOptionPosition = selectedOptionNum
@@ -118,6 +131,10 @@ class QuizQuestionsActivity : AppCompatActivity(), View.OnClickListener {
             R.drawable.selected_option_border_bg)
     }
 
+    /**
+     * Decides what it wants to do, be it selecting an option or checking to see if the answer
+     * is correct.
+     */
     override fun onClick(view: View?) {
         when(view?.id){
             R.id.textViewOption1 -> {
@@ -141,9 +158,74 @@ class QuizQuestionsActivity : AppCompatActivity(), View.OnClickListener {
                 }
             }
             R.id.buttonSubmit -> {
-                //TODO: Implement button submit
+                submitted()
             }
         }
+    }
+
+    /**
+     * Checks to see if you have selected a guess and if not, asks you to.
+     * If you have then it checks to see if it is the right answer and feeds that back.
+     */
+    private fun submitted(){
+        if(mSelectedOptionPosition == 0){
+            mCurrentPosition++
+
+            when{
+                mCurrentPosition <= mQuestionsList!!.size -> {
+                    setQuestion()
+                }else -> {
+                    val intent = Intent(this, ResultActivity::class.java)
+                    intent.putExtra(Constants.USER_NAME, mUserName)
+                    intent.putExtra(Constants.TOTAL_QUESTIONS, mQuestionsList?.size)
+                    intent.putExtra(Constants.CORRECT_ANSWERS, mCorrectAnswers)
+                    startActivity(intent)
+                    finish()
+                }
+            }
+        }else{
+            val question = mQuestionsList?.get(mCurrentPosition - 1)
+            if(question!!.correctAnswer != mSelectedOptionPosition){
+                answerView(mSelectedOptionPosition, R.drawable.wrong_option_border_bg)
+            }else{
+                mCorrectAnswers++
+            }
+            answerView(question.correctAnswer, R.drawable.correct_option_border_bg)
+
+            if(mCurrentPosition == mQuestionsList!!.size){
+                buttonSubmit?.text = getString(R.string.finish)
+            }else{
+                buttonSubmit?.text = getString(R.string.go_to_next_question)
+            }
+
+            mSelectedOptionPosition = 0
+        }
+    }
+
+    /**
+     * Sets the view for the correct answer and also shows if you selected the wrong answer.
+     */
+    private fun answerView(answer: Int, drawableView: Int){
+
+        when(answer){
+            1 -> {
+                textViewOption1?.background = ContextCompat.getDrawable(
+                    this, drawableView)
+            }
+            2 -> {
+                textViewOption2?.background = ContextCompat.getDrawable(
+                    this, drawableView)
+            }
+            3 -> {
+                textViewOption3?.background = ContextCompat.getDrawable(
+                    this, drawableView)
+            }
+            4 -> {
+                textViewOption4?.background = ContextCompat.getDrawable(
+                    this, drawableView)
+            }
+        }
+
     }
 
 }
